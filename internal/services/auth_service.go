@@ -55,6 +55,7 @@ func (s *AuthService) Register(input RegisterInput) (*models.User, error) {
 		Password:  string(hashedPassword),
 		FirstName: input.FirstName,
 		LastName:  input.LastName,
+		Role:      "user",
 	}
 
 	if err := s.userRepository.Create(user); err != nil {
@@ -108,6 +109,7 @@ func (s *AuthService) generateAccessToken(
 		"user_id": user.ID.String(),
 		"email":   user.Email,
 		"type":    "access",
+		"role":    user.Role,
 		"exp":     time.Now().Add(15 * time.Minute).Unix(),
 		"iat":     time.Now().Unix(),
 	}
@@ -126,6 +128,7 @@ func (s *AuthService) generateRefreshToken(
 	claims := jwt.MapClaims{
 		"user_id": user.ID.String(),
 		"type":    "refresh",
+		"role":    user.Role,
 		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
 		"iat":     time.Now().Unix(),
 	}

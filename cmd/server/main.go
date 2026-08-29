@@ -57,6 +57,14 @@ func main() {
 		applicationService,
 	)
 
+	adminService := services.NewAdminService(
+		applicationRepository,
+	)
+
+	adminHandler := handlers.NewAdminHandler(
+		adminService,
+	)
+
 	router := gin.Default()
 
 	routes.SetupRoutes(
@@ -64,6 +72,7 @@ func main() {
 		authHandler,
 		applicationHandler,
 		cfg.JWTSecret,
+		adminHandler,
 	)
 
 	log.Printf("server running on :%s", cfg.Port)

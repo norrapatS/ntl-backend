@@ -50,3 +50,15 @@ func (r *ApplicationRepository) FindByUserID(
 
 	return applications, nil
 }
+
+func (r *ApplicationRepository) FindAll() ([]models.Application, error) {
+	var applications []models.Application
+
+	if err := r.db.
+		Preload("User").
+		Find(&applications).Error; err != nil {
+		return nil, err
+	}
+
+	return applications, nil
+}

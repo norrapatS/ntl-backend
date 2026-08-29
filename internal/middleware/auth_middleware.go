@@ -78,7 +78,19 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 			return
 		}
 
+		role, ok := claims["role"].(string)
+
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "invalid role",
+			})
+			c.Abort()
+			return
+		}
+
 		c.Set("userID", userID)
+
+		c.Set("role", role)
 
 		c.Next()
 	}

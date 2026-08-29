@@ -12,6 +12,7 @@ func SetupRoutes(
 	authHandler *handlers.AuthHandler,
 	applicationHandler *handlers.ApplicationHandler,
 	jwtSecret string,
+	adminHandler *handlers.AdminHandler,
 ) {
 	router.Use(middleware.Cors())
 
@@ -19,6 +20,7 @@ func SetupRoutes(
 
 	auth := api.Group("/auth")
 	applications := api.Group("/applications")
+	admin := api.Group("/admin")
 
 	auth.POST("/register", authHandler.Register)
 	auth.POST("/login", authHandler.Login)
@@ -27,4 +29,18 @@ func SetupRoutes(
 		middleware.AuthMiddleware(jwtSecret),
 	)
 	applications.POST("", applicationHandler.Create)
+
+	admin.Use(
+		middleware.AuthMiddleware(jwtSecret),
+		middleware.AdminMiddleware(),
+	)
+	admin.GET(
+		"/applications",
+		adminHandler.GetApplications,
+	)
+
+	admin.GET(
+		"/applications/:id",
+		adminHandler.GetApplicationByID,
+	)
 }
