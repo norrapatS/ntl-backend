@@ -3,21 +3,60 @@ package main
 import (
 	"log"
 
+	"ntl-test/backend/internal/config"
+	"ntl-test/backend/internal/database"
+	"ntl-test/backend/internal/handlers"
+	"ntl-test/backend/internal/models"
+	"ntl-test/backend/internal/repositories"
+	"ntl-test/backend/internal/routes"
+	"ntl-test/backend/internal/services"
+
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	cfg := config.Load()
 
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "API is running",
-		})
-	})
+	db := database.ConnectDatabase(
+		database.Config{
+			Host:     cfg.DBHost,
+			Port:     cfg.DBPort,
+			User:     cfg.DBUser,
+			Password: cfg.DBPassword,
+			Name:     cfg.DBName,
+			SSLMode:  cfg.DBSSLMode,
+		},
+	)
 
-	log.Println("Server running on :8080")
+	err := db.AutoMigrate(
+		&models.User{},
+	)
 
-	if err := r.Run(":8080"); err != nil {
+	if err != nil {
+		log.Fatal("failed to migrate database:", err)
+	}
+
+	userRepository := repositories.NewUserRepository(db)
+
+	authService := services.NewAuthService(
+		userRepository,
+		cfg.JWTSecret,
+	)
+
+	authHandler := handlers.NewAuthHandler(
+		authService,
+	)
+
+	router := gin.Default()
+
+	routes.SetupRoutes(
+		router,
+		authHandler,
+	)
+
+	log.Printf("server running on :%s", cfg.Port)
+
+	if err := router.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
 	}
 }
