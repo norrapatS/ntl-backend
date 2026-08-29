@@ -69,36 +69,71 @@ type LoginInput struct {
 	Password string
 }
 
-func (s *AuthService) Login(input LoginInput) (string, *models.User, error) {
+func (s *AuthService) Login(
+	input LoginInput,
+) (string, string, error) {
+
 	user, err := s.userRepository.FindByEmail(input.Email)
 
 	if err != nil {
-		return "", nil, errors.New("invalid email or password")
+		return "", "", errors.New("invalid email or password")
 	}
 
-	err = bcrypt.CompareHashAndPassword(
+	if err := bcrypt.CompareHashAndPassword(
 		[]byte(user.Password),
 		[]byte(input.Password),
-	)
+	); err != nil {
+		return "", "", errors.New("invalid email or password")
+	}
+
+	accessToken, err := s.generateAccessToken(user)
 
 	if err != nil {
-		return "", nil, errors.New("invalid email or password")
+		return "", "", err
+	}
+
+	refreshToken, err := s.generateRefreshToken(user)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
+}
+
+func (s *AuthService) generateAccessToken(
+	user *models.User,
+) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": user.ID.String(),
+		"email":   user.Email,
+		"type":    "access",
+		"exp":     time.Now().Add(15 * time.Minute).Unix(),
+		"iat":     time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"user_id": user.ID,
-			"email":   user.Email,
-			"exp":     time.Now().Add(24 * time.Hour).Unix(),
-		},
+		claims,
 	)
 
-	tokenString, err := token.SignedString([]byte(s.jwtSecret))
+	return token.SignedString([]byte(s.jwtSecret))
+}
 
-	if err != nil {
-		return "", nil, err
+func (s *AuthService) generateRefreshToken(
+	user *models.User,
+) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": user.ID.String(),
+		"type":    "refresh",
+		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"iat":     time.Now().Unix(),
 	}
 
-	return tokenString, user, nil
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
+
+	return token.SignedString([]byte(s.jwtSecret))
 }

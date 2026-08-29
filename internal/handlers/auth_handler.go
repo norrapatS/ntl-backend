@@ -74,7 +74,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, user, err := h.authService.Login(
+	accessToken, refreshToken, err := h.authService.Login(
 		services.LoginInput{
 			Email:    request.Email,
 			Password: request.Password,
@@ -88,9 +88,31 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie(
+		"access_token",
+		accessToken,
+		60*15,
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	c.SetCookie(
+		"refresh_token",
+		refreshToken,
+		60*60*24*7,
+		"/",
+		"",
+		false,
+		true,
+	)
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "login successful",
-		"token":   token,
-		"user":    user,
+		"data": gin.H{
+			"accessToken":  accessToken,
+			"refreshToken": refreshToken,
+		},
 	})
 }
