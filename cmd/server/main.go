@@ -30,6 +30,7 @@ func main() {
 
 	err := db.AutoMigrate(
 		&models.User{},
+		&models.Application{},
 	)
 
 	if err != nil {
@@ -37,14 +38,23 @@ func main() {
 	}
 
 	userRepository := repositories.NewUserRepository(db)
+	applicationRepository := repositories.NewApplicationRepository(db)
 
 	authService := services.NewAuthService(
 		userRepository,
 		cfg.JWTSecret,
 	)
 
+	applicationService := services.NewApplicationService(
+		applicationRepository,
+	)
+
 	authHandler := handlers.NewAuthHandler(
 		authService,
+	)
+
+	applicationHandler := handlers.NewApplicationHandler(
+		applicationService,
 	)
 
 	router := gin.Default()
@@ -52,6 +62,8 @@ func main() {
 	routes.SetupRoutes(
 		router,
 		authHandler,
+		applicationHandler,
+		cfg.JWTSecret,
 	)
 
 	log.Printf("server running on :%s", cfg.Port)
