@@ -103,7 +103,7 @@ func (s *ApplicationService) Create(
 		HouseholdSize: input.HouseholdSize,
 		Debt:          input.Debt,
 		LandOwned:     input.LandOwned,
-		Status:        "draft",
+		Status:        "pending",
 	}
 
 	if err := s.applicationRepository.Create(application); err != nil {

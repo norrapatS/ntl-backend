@@ -34,7 +34,7 @@ type Application struct {
 	Debt          float64 `json:"debt"`
 	LandOwned     string  `gorm:"size:50" json:"landOwned"`
 
-	Status string `gorm:"size:30;not null;default:'draft'" json:"status"`
+	Status string `gorm:"size:30;not null;default:'pending'" json:"status"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
