@@ -25,6 +25,12 @@ func SetupRoutes(
 	auth.POST("/register", authHandler.Register)
 	auth.POST("/login", authHandler.Login)
 
+	auth.GET(
+		"/user-profile",
+		middleware.AuthMiddleware(jwtSecret),
+		authHandler.AuthUserProfile,
+	)
+
 	applications.Use(
 		middleware.AuthMiddleware(jwtSecret),
 	)
@@ -40,7 +46,7 @@ func SetupRoutes(
 	)
 
 	admin.GET(
-		"/applications/:id",
-		adminHandler.GetApplicationByID,
+		"/applications/:transactionNo",
+		adminHandler.GetApplicationByTransactionNumber,
 	)
 }

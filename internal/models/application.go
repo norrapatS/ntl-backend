@@ -9,6 +9,7 @@ import (
 type Application struct {
 	ID            uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID        uuid.UUID `gorm:"type:uuid;not null;index" json:"userId"`
+	TransactionNo string    `gorm:"type:varchar(30);uniqueIndex;not null" json:"transactionNo"`
 	User          User      `gorm:"foreignKey:UserID" json:"user"`
 	NationalID    string    `gorm:"size:13;not null" json:"nationalId"`
 	Prefix        string    `gorm:"size:20" json:"prefix"`

@@ -6,7 +6,6 @@ import (
 	"ntl-test/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type AdminHandler struct {
@@ -37,17 +36,17 @@ func (h *AdminHandler) GetApplications(c *gin.Context) {
 	})
 }
 
-func (h *AdminHandler) GetApplicationByID(c *gin.Context) {
-	id, err := uuid.Parse(c.Param("id"))
+func (h *AdminHandler) GetApplicationByTransactionNumber(c *gin.Context) {
+	transactionNo := c.Param("transactionNo")
 
-	if err != nil {
+	if transactionNo == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid application id",
+			"message": "transaction number is required",
 		})
 		return
 	}
 
-	application, err := h.adminService.GetApplicationByID(id)
+	application, err := h.adminService.GetApplicationByTransactionNo(transactionNo)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{

@@ -62,3 +62,18 @@ func (r *ApplicationRepository) FindAll() ([]models.Application, error) {
 
 	return applications, nil
 }
+
+func (r *ApplicationRepository) FindByTransactionNo(
+	transactionNo string,
+) (*models.Application, error) {
+	var application models.Application
+
+	if err := r.db.
+		Preload("User").
+		Where("transaction_no = ?", transactionNo).
+		First(&application).Error; err != nil {
+		return nil, err
+	}
+
+	return &application, nil
+}

@@ -2,6 +2,9 @@ package services
 
 import (
 	"errors"
+	"fmt"
+	"strings"
+	"time"
 
 	"ntl-test/backend/internal/models"
 	"ntl-test/backend/internal/repositories"
@@ -48,6 +51,16 @@ type CreateApplicationInput struct {
 	LandOwned     string
 }
 
+func generateTransactionNo() string {
+	now := time.Now()
+
+	return fmt.Sprintf(
+		"APP-%s-%s",
+		now.Format("20060102"),
+		strings.ToUpper(uuid.New().String()[:8]),
+	)
+}
+
 func (s *ApplicationService) Create(
 	input CreateApplicationInput,
 ) (*models.Application, error) {
@@ -68,6 +81,7 @@ func (s *ApplicationService) Create(
 	}
 
 	application := &models.Application{
+		TransactionNo: generateTransactionNo(),
 		ID:            uuid.New(),
 		UserID:        input.UserID,
 		NationalID:    input.NationalID,

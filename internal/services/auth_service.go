@@ -140,3 +140,13 @@ func (s *AuthService) generateRefreshToken(
 
 	return token.SignedString([]byte(s.jwtSecret))
 }
+
+func (s *AuthService) GetUserByID(userID uuid.UUID) (*models.User, error) {
+	user, err := s.userRepository.FindByID(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}

@@ -4,7 +4,6 @@ import (
 	"ntl-test/backend/internal/models"
 	"ntl-test/backend/internal/repositories"
 
-	"github.com/google/uuid"
 )
 
 type AdminService struct {
@@ -23,8 +22,8 @@ func (s *AdminService) GetApplications() ([]models.Application, error) {
 	return s.applicationRepository.FindAll()
 }
 
-func (s *AdminService) GetApplicationByID(
-	id uuid.UUID,
+func (s *AdminService) GetApplicationByTransactionNo(
+	transactionNo string,
 ) (*models.Application, error) {
-	return s.applicationRepository.FindByID(id)
+	return s.applicationRepository.FindByTransactionNo(transactionNo)
 }

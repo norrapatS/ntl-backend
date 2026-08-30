@@ -6,6 +6,7 @@ import (
 	"ntl-test/backend/internal/services"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -113,6 +114,37 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"data": gin.H{
 			"accessToken":  accessToken,
 			"refreshToken": refreshToken,
+		},
+	})
+}
+
+func (h *AuthHandler) AuthUserProfile(c *gin.Context) {
+	userID, exists := c.Get("userID")
+
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	user, err := h.authService.GetUserByID(userID.(uuid.UUID))
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "user not found",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data": gin.H{
+			"id":        user.ID,
+			"email":     user.Email,
+			"firstName": user.FirstName,
+			"lastName":  user.LastName,
+			"role" : user.Role,
 		},
 	})
 }
